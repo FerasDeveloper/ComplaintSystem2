@@ -121,13 +121,4 @@ class AuthController extends Controller
       'government_id'       => $governmentUser->governments()->first()?->id
     ], 201);
   }
-
-  public function getGovernments(){
-    return response()->json($this->authService->getGovernments());
-  }
-
-  public function getComplaintTypes(){
-    return response()->json($this->authService->getComplaintTypes());
-  }
-
 }

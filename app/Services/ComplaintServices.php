@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\StoreAttachmentJob;
 use App\Repositories\ComplaintRepositoryInterface;
 use App\Models\Complaint;
+use Illuminate\Support\Facades\DB;
 
 class ComplaintServices
 {
@@ -43,5 +44,51 @@ class ComplaintServices
   public function getComplaints()
   {
     return $this->complaints->getComplaints();
+  }
+
+  public function editComplaint($id, $user, $data)
+  {
+    if ($user->role_id != 2 && $user->role_id != 3) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Unauthorized to edit complaint'
+      ], 403);
+    }
+
+    return DB::transaction(function () use ($id, $user, $data) {
+      $complaint = $this->complaints->find($id);
+
+      if (!empty($complaint->editing_by) && $complaint->editing_by !== $user->name) {
+        return response()->json([
+          'success' => false,
+          'message' => "Cannot edit this complaint as it is being edited by $complaint->editing_by"
+        ], 423);
+      }
+
+      $complaint = Complaint::lockForUpdate()->find($id);
+
+      if (!empty($complaint->editing_by) && $complaint->editing_by !== $user->name) {
+        return response()->json([
+          'success' => false,
+          'message' => "Cannot edit this complaint as it is being edited by $complaint->editing_by"
+        ], 423);
+      }
+
+      $complaint->editing_by = $user->name;
+      $complaint->save();
+
+      $this->complaints->update($complaint, $data);
+      $r = $user->role();
+      $role = $r->name;
+      $this->complaints->addComplaintLogs($complaint,$role, $data);
+
+      $complaint->editing_by = null;
+      $complaint->save();
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Complaint updated successfully'
+      ]);
+    });
   }
 }

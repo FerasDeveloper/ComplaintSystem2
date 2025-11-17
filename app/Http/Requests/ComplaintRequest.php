@@ -21,14 +21,26 @@ class ComplaintRequest extends FormRequest
    */
   public function rules(): array
   {
-    return [
-      'title' => 'required|string|max:255',
-      'location' => 'required|string|max:255',
-      'description' => 'required|string|max:2000',
-      'government_id' => 'required|exists:governments,id',
-      'status' => 'required|string|in:waiting,pending,resolved,rejected',
-      'type_id' => 'required|exists:complaint_types,id',
-      'attachments.*' => 'nullable|file|mimes:png,jpg,jpeg,mp4,mov,pdf,csv|max:10240'
-    ];
+
+    // نحصل على اسم الميثود الموجود في الراوت
+    $action = $this->route()->getActionMethod();
+
+    if ($action === 'addComplaint') {
+      return [
+        'title' => 'required|string|max:255',
+        'location' => 'required|string|max:255',
+        'description' => 'required|string|max:2000',
+        'government_id' => 'required|exists:governments,id',
+        'status' => 'required|string|in:waiting,pending,resolved,rejected',
+        'type_id' => 'required|exists:complaint_types,id',
+        'attachments.*' => 'nullable|file|mimes:png,jpg,jpeg,mp4,mov,pdf,csv|max:10240'
+      ];
+    } else if ($action === 'editComplaint') {
+      return [
+        'status' => 'required|string|in:pending,addNote,resolved,rejected',
+      ];
+    } else {
+      return [];
+    }
   }
 }

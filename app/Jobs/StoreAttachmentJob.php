@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Complaint;
+use App\Models\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -52,10 +53,10 @@ class StoreAttachmentJob implements ShouldQueue
   {
     $complaint = Complaint::find($this->complaint_id);
     if ($complaint) {
-      // $notification = Notification::create([
-      //   'user_id' => $complaint->user_id,
-        // 'message' => 'Failed to add your complaint because attachments upload failed. please try again',
-      //   ])
+      Notification::create([
+        'user_id' => $complaint->user_id,
+        'content' => 'Failed to add your complaint because attachments upload failed. please try again',
+      ]);
       $complaint->delete();
     }
     Log::critical("فشل نهائي بعد 3 محاولات لتخزين المرفق للشكوى {$this->complaint_id}: " . $exception->getMessage());

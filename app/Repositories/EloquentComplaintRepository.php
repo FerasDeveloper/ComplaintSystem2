@@ -44,6 +44,21 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
     });
   }
 
+  public function update(Complaint $complaint, array $data): void
+  {
+    $complaint->update($data);
+    Cache::put("complaint_{$complaint->id}", $complaint, \Carbon\Carbon::now()->addMinutes(10));
+  }
+
+  public function addComplaintLogs(Complaint $complaint,string $role, array $data): void
+  {
+    $complaint->logs()->create([
+      'new_status' => $data['status'],
+      'actor_type' => $role,
+      'note' => $data['note'] ?? null,
+    ]);
+  }
+
   public function getComplaints()
   {
     $u = Auth::user();

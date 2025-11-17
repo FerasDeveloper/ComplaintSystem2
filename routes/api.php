@@ -18,6 +18,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   // Complaint
   Route::post('addComplaint', [ComplaintController::class, 'addComplaint']);
+  Route::patch('complaints/{id}', [ComplaintController::class, 'editComplaint']);
   Route::get('showComplaint/{id}', [ComplaintController::class, 'showComplaint']);
   Route::get('getComplaints', [ComplaintController::class, 'getComplaints']);
 });

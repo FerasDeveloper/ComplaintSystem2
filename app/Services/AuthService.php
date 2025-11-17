@@ -169,14 +169,4 @@ class AuthService
       return $user;
     });
   }
-
-  public function getGovernments()
-  {
-    return Government::all(['id', 'name']);
-  }
-
-  public function getComplaintTypes()
-  {
-    return ComplaintType::all(['id', 'name']);
-  }
 }

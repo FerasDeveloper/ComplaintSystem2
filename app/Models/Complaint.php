@@ -12,6 +12,7 @@ class Complaint extends Model
     'description',
     'type_id',
     'status',
+    'editing_by',
     'user_id',
     'government_id',
     'attachments_count',

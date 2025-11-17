@@ -35,4 +35,14 @@ class ComplaintController extends Controller
   {
     return response()->json($this->complaintSerive->getComplaints(), 200);
   }
+
+  public function editComplaint($id, ComplaintRequest $request)
+  {
+    $user = $request->user();
+    if (!$user) {
+      return response()->json(['message' => 'Unauthorized'], 401);
+    }
+    $data = $request->only('status', 'note');
+    return $this->complaintSerive->editComplaint($id, $user, $data);
+  }
 }
