@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ComplaintLog extends Model
 {
     protected $fillable = [
-        'update_date',
+        // 'update_date',
         'new_status',
         'note_content',
         'actor_type',

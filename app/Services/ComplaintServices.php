@@ -67,20 +67,14 @@ class ComplaintServices
 
       $complaint = Complaint::lockForUpdate()->find($id);
 
-      if (!empty($complaint->editing_by) && $complaint->editing_by !== $user->name) {
-        return response()->json([
-          'success' => false,
-          'message' => "Cannot edit this complaint as it is being edited by $complaint->editing_by"
-        ], 423);
-      }
-
       $complaint->editing_by = $user->name;
       $complaint->save();
+      
+      $userInfo['role'] = $user->role_id == 2 ? 'government' : 'employee';
+      $userInfo['user_id'] = $user->id;
 
       $this->complaints->update($complaint, $data);
-      $r = $user->role();
-      $role = $r->name;
-      $this->complaints->addComplaintLogs($complaint,$role, $data);
+      $this->complaints->addComplaintLogs($complaint,$userInfo, $data);
 
       $complaint->editing_by = null;
       $complaint->save();

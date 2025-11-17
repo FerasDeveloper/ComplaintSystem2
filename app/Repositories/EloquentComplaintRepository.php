@@ -50,12 +50,14 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
     Cache::put("complaint_{$complaint->id}", $complaint, \Carbon\Carbon::now()->addMinutes(10));
   }
 
-  public function addComplaintLogs(Complaint $complaint,string $role, array $data): void
+  public function addComplaintLogs(Complaint $complaint,array $userInfo, array $data): void
   {
     $complaint->logs()->create([
       'new_status' => $data['status'],
-      'actor_type' => $role,
-      'note' => $data['note'] ?? null,
+      'actor_type' => $userInfo['role'],
+      'user_id' => $userInfo['user_id'],
+      // 'update_date' => Carbon::now(),
+      'note_content' => $data['note'] ?? null,
     ]);
   }
 

@@ -20,7 +20,7 @@ return new class extends Migration
       $table->string('actor_type');
       $table->foreignIdFor(Complaint::class);
       $table->foreignIdFor(User::class);
-      $table->dateTime('update_date');
+      // $table->dateTime('update_date');
       $table->timestamps();
     });
   }
