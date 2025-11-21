@@ -85,13 +85,8 @@ class ComplaintServices
       ]);
     });
   }
-  public function getCitizenComplaintStatus(int $id) {
-    return $this->complaints->getCitizenComplaintStatus($id);
+  public function getComplaintLog(int $id) {
+    return $this->complaints->getComplaintLog($id);
   }
-  public function getAdminComplaintsLogs(int $id) {
-    return $this->complaints->getAdminComplaintsLogs($id);
-  }
-  public function getGovernmentComplaintLogs(int $id) {
-    return $this->complaints->getGovernmentComplaintLogs($id);
-  }
+  
 }

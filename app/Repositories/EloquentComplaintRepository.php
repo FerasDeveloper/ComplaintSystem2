@@ -77,24 +77,16 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
       }
     });
   }
-  public function getCitizenComplaintStatus(int $id) {
+  public function getComplaintLog(int $id) {
     $u = Auth::user();
     $user = User::find($u->id);
-    if($user->role === 'citizen') {
+    if($user->role_id === (int)'4') {
         return Complaint::with('logs')->where('user_id', $user->id)->latest();
     }
-  }
-  public function getAdminComplaintsLogs(int $id) {
-    $u = Auth::user();
-    $user = User::find($u->id);
-    if($user->role === 'admin') {
+    else if ($user->role_id === (int)'1') {
         return Complaint::with('logs')->where('complaint_id' , $id)->get();
     }
-  }
-  public function getGovernmentComplaintLogs(int $id) {
-    $u = Auth::user();
-    $user = User::find($u->id);
-    if($user->role === 'employee') {
+    else if ($user->role_id === (int)'3') {
         $government = User_Goverment::where('user_id', $user->id)->get();
         return Complaint::with('logs')->where('complaint_id' , $id)->where('government_id' , $government->government_id)->get();
     }

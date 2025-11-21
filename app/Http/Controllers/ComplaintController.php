@@ -45,13 +45,7 @@ class ComplaintController extends Controller
     $data = $request->only('status', 'note');
     return $this->complaintSerive->editComplaint($id, $user, $data);
   }
-  public function getCitizenComplaintStatus($id) {
-    return response()->json($this->complaintSerive->getCitizenComplaintStatus($id));
-  }
-  public function getAdminComplaintsLogs($id) {
-    return response()->json($this->complaintSerive->getAdminComplaintsLogs($id));
-  }
-  public function getGovernmentComplaintLogs($id) {
-    return response()->json($this->complaintSerive->getGovernmentComplaintLogs($id));
+  public function getComplaintLog($id) {
+    return response()->json($this->complaintSerive->getComplaintLog($id));
   }
 }
