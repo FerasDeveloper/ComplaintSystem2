@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Complaint;
+use App\Models\ComplaintType;
+use App\Models\Government;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\User_Goverment;
@@ -41,6 +43,10 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
   {
     return Cache::remember("complaint_{$id}", \Carbon\Carbon::now()->addMinutes(10), function () use ($id) {
       $complaint = Complaint::with('attachments')->findOrFail($id);
+      $user = User::find($complaint->user_id);
+      if($user->role_id !== 4){
+        $complaint->load('logs');
+      }
       $complaint->attachments->makeHidden(['file_type', 'complaint_id', 'created_at', 'updated_at']);
       return $complaint;
     });
@@ -72,31 +78,33 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
     $u = Auth::user();
     $user = User::find($u->id);
     return Cache::remember("complaints_user_{$user->id}", \Carbon\Carbon::now()->addMinutes(10), function () use ($user) {
-    if ($user->role_id === 3) {
-      $governmentId = $user->governments()->first()->id;
-      return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
-    } elseif ($user->role_id === 1) {
-      return Complaint::with('attachments')->latest()->get();
-    } elseif ($user->role_id === 2) {
-      $governmentId = $user->governments()->first()->id;
-      return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
-    } elseif ($user->role_id === 4) {
-      return Complaint::with('attachments')->where('user_id', $user->id)->latest()->get();
-    }
+      if ($user->role_id === 3) {
+        $governmentId = $user->governments()->first()->id;
+        return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
+      } elseif ($user->role_id === 1) {
+        return Complaint::with('attachments')->latest()->get();
+      } elseif ($user->role_id === 2) {
+        $governmentId = $user->governments()->first()->id;
+        return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
+      } elseif ($user->role_id === 4) {
+        return Complaint::with('attachments')->where('user_id', $user->id)->latest()->get();
+      }
     });
   }
-  public function getComplaintLog(int $id) {
+  public function getComplaintLog(int $id)
+  {
     $u = Auth::user();
     $user = User::find($u->id);
-    if($user->role_id === (int)'4') {
-        return Complaint::with('logs')->where('user_id', $user->id)->latest();
-    }
-    else if ($user->role_id === (int)'1') {
-        return Complaint::with('logs')->where('complaint_id' , $id)->get();
-    }
-    else if ($user->role_id === (int)'3') {
-        $government = User_Goverment::where('user_id', $user->id)->get();
-        return Complaint::with('logs')->where('complaint_id' , $id)->where('government_id' , $government->government_id)->get();
+    if ($user->role_id === 4) {
+      $complaint = Complaint::with('attachments')->where('id', $id)->first();
+      $complaint['type_name'] = ComplaintType::find($complaint->type_id)->name;
+      $complaint['government_name'] = Government::find($complaint->government_id)->name;
+      return $complaint;
+    } else {
+      $complaint = Complaint::with(['attachments', 'logs'])->where('id', $id)->first();
+      $complaint['type_name'] = ComplaintType::find($complaint->type_id)->name;
+      $complaint['government_name'] = Government::find($complaint->government_id)->name;
+      return $complaint;
     }
   }
 }
