@@ -92,18 +92,18 @@ class User extends Authenticatable
 
   public function isAdmin()
   {
-    return $this->role === 'admin';
+    return $this->role_id === 1;
   }
   public function isGovernment()
   {
-    return $this->role === 'government';
+    return $this->role_id === 2;
   }
   public function isEmploee()
   {
-    return $this->role === 'employee';
+    return $this->role_id === 3;
   }
   public function isCitizen()
   {
-    return $this->role === 'citizen';
+    return $this->role_id === 4;
   }
 }

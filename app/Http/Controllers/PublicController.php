@@ -19,4 +19,8 @@ class PublicController extends Controller
   {
     return response()->json($this->publicService->getComplaintTypes());
   }
+  public function test()
+  {
+    return response()->json(['message' => 'dwdww']);
+  }
 }

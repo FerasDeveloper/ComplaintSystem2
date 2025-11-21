@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Complaint;
+use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -47,10 +48,14 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
   public function update(Complaint $complaint, array $data): void
   {
     $complaint->update($data);
+    Notification::create([
+      'user_id' => $complaint->user_id,
+      'content' => "Your complaint #{$complaint->id} status has been updated to {$data['status']}",
+    ]);
     Cache::put("complaint_{$complaint->id}", $complaint, \Carbon\Carbon::now()->addMinutes(10));
   }
 
-  public function addComplaintLogs(Complaint $complaint,array $userInfo, array $data): void
+  public function addComplaintLogs(Complaint $complaint, array $userInfo, array $data): void
   {
     $complaint->logs()->create([
       'new_status' => $data['status'],
@@ -65,15 +70,18 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
   {
     $u = Auth::user();
     $user = User::find($u->id);
-    return Cache::remember("complaints_user_{$user->id}", \Carbon\Carbon::now()->addMinutes(1), function () use ($user) {
-      if ($user->role === 'employee') {
-        $governmentId = $user->governments()->first()->id;
-        return Complaint::with('attachments')->where('government_id', $governmentId)->get();
-      } elseif ($user->role === 'admin') {
-        return Complaint::with('attachments')->get();
-      } elseif ($user->role === 'citizen') {
-        return Complaint::with('attachments')->where('user_id', $user->id)->get();
-      }
+    return Cache::remember("complaints_user_{$user->id}", \Carbon\Carbon::now()->addMinutes(10), function () use ($user) {
+    if ($user->role_id === 3) {
+      $governmentId = $user->governments()->first()->id;
+      return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
+    } elseif ($user->role_id === 1) {
+      return Complaint::with('attachments')->latest()->get();
+    } elseif ($user->role_id === 2) {
+      $governmentId = $user->governments()->first()->id;
+      return Complaint::with('attachments')->where('government_id', $governmentId)->latest()->get();
+    } elseif ($user->role_id === 4) {
+      return Complaint::with('attachments')->where('user_id', $user->id)->latest()->get();
+    }
     });
   }
 }

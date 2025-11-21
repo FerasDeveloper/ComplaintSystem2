@@ -2,14 +2,15 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-Route::get('governments', [AuthController::class, 'getGovernments']);
-Route::get('complaintTypes', [AuthController::class, 'getComplaintTypes']);
+Route::get('governments', [PublicController::class, 'getGovernments']);
+Route::get('complaintTypes', [PublicController::class, 'getComplaintTypes']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
