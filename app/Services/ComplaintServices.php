@@ -69,7 +69,7 @@ class ComplaintServices
 
       $complaint->editing_by = $user->name;
       $complaint->save();
-      
+
       $userInfo['role'] = $user->role_id == 2 ? 'government' : 'employee';
       $userInfo['user_id'] = $user->id;
 
@@ -84,5 +84,14 @@ class ComplaintServices
         'message' => 'Complaint updated successfully'
       ]);
     });
+  }
+  public function getCitizenComplaintStatus(int $id) {
+    return $this->complaints->getCitizenComplaintStatus($id);
+  }
+  public function getAdminComplaintsLogs(int $id) {
+    return $this->complaints->getAdminComplaintsLogs($id);
+  }
+  public function getGovernmentComplaintLogs(int $id) {
+    return $this->complaints->getGovernmentComplaintLogs($id);
   }
 }
