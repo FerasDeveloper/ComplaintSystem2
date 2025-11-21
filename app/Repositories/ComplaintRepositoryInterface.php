@@ -13,4 +13,5 @@ interface ComplaintRepositoryInterface
   public function update(Complaint $complaint, array $data): void;
   public function getComplaints();
   public function addComplaintLogs(Complaint $complaint,array $userInfo, array $data): void;
+  public function getComplaintLog(int $id);
 }

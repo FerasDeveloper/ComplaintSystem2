@@ -45,4 +45,7 @@ class ComplaintController extends Controller
     $data = $request->only('status', 'note');
     return $this->complaintSerive->editComplaint($id, $user, $data);
   }
+  public function getComplaintLog($id) {
+    return response()->json($this->complaintSerive->getComplaintLog($id));
+  }
 }

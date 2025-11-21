@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Complaint;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\User_Goverment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -83,5 +84,19 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
       return Complaint::with('attachments')->where('user_id', $user->id)->latest()->get();
     }
     });
+  }
+  public function getComplaintLog(int $id) {
+    $u = Auth::user();
+    $user = User::find($u->id);
+    if($user->role_id === (int)'4') {
+        return Complaint::with('logs')->where('user_id', $user->id)->latest();
+    }
+    else if ($user->role_id === (int)'1') {
+        return Complaint::with('logs')->where('complaint_id' , $id)->get();
+    }
+    else if ($user->role_id === (int)'3') {
+        $government = User_Goverment::where('user_id', $user->id)->get();
+        return Complaint::with('logs')->where('complaint_id' , $id)->where('government_id' , $government->government_id)->get();
+    }
   }
 }
