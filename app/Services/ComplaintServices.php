@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Aspects\MethodAspect;
+use App\Aspects\TransactionAspect;
 use App\Jobs\StoreAttachmentJob;
 use App\Repositories\ComplaintRepositoryInterface;
 use App\Models\Complaint;
-use Illuminate\Support\Facades\DB;
 
 class ComplaintServices
 {
@@ -34,6 +35,9 @@ class ComplaintServices
     } else {
       $complaint->update(['status' => 'new']);
     }
+    MethodAspect::after(__METHOD__, [
+      "${user['name']} added a complaint with id: ${complaint['id']}"
+    ]);
   }
 
   public function showComplaint($id): Complaint
@@ -48,25 +52,19 @@ class ComplaintServices
 
   public function editComplaint($id, $user, $data)
   {
-    if ($user->role_id != 2 && $user->role_id != 3) {
-      return response()->json([
-        'success' => false,
-        'message' => 'Unauthorized to edit complaint'
-      ], 403);
-    }
+    $aspect = new TransactionAspect();
 
-    return DB::transaction(function () use ($id, $user, $data) {
+    $aspect->register(function () use ($id, $user, $data, &$complaint) {
       $complaint = $this->complaints->find($id);
 
       if (!empty($complaint->editing_by) && $complaint->editing_by !== $user->name) {
-        return response()->json([
-          'success' => false,
-          'message' => "Cannot edit this complaint as it is being edited by $complaint->editing_by"
-        ], 423);
+        MethodAspect::after(__METHOD__, [
+          "{$user->name} tried to edit {$complaint->id} that locked by {$complaint->editing_by}"
+        ]);
+        throw new \Exception("Cannot edit complaint {$complaint->id} as it is being edited by {$complaint->editing_by}");
       }
 
       $complaint = Complaint::lockForUpdate()->find($id);
-
       $complaint->editing_by = $user->name;
       $complaint->save();
 
@@ -74,19 +72,33 @@ class ComplaintServices
       $userInfo['user_id'] = $user->id;
 
       $this->complaints->update($complaint, $data);
-      $this->complaints->addComplaintLogs($complaint,$userInfo, $data);
+      $this->complaints->addComplaintLogs($complaint, $userInfo, $data);
 
       $complaint->editing_by = null;
       $complaint->save();
+    });
 
+    $aspect->registerAfterCommit(function () use ($complaint, $user) {
+      MethodAspect::after(__METHOD__, [
+        "complaint {$complaint?->id} was updated by {$user->name}"
+      ]);
+    });
+
+    try {
+      $aspect->commit();
       return response()->json([
         'success' => true,
         'message' => 'Complaint updated successfully'
-      ]);
-    });
+      ], 201);
+    } catch (\Exception $e) {
+      return response()->json([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], 423);
+    }
   }
-  public function getComplaintLog(int $id) {
+  public function getComplaintLog(int $id)
+  {
     return $this->complaints->getComplaintLog($id);
   }
-  
 }

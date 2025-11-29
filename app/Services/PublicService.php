@@ -9,11 +9,11 @@ class PublicService
 {
   public function getGovernments()
   {
-    return Government::all(['id', 'name']);
+    return Government::all();
   }
 
   public function getComplaintTypes()
   {
-    return ComplaintType::all(['id', 'name']);
+    return ComplaintType::all();
   }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Aspects\TransactionAspect;
 use App\Jobs\SendOtpMailJob;
-use App\Models\ComplaintType;
 use App\Models\Government;
 use App\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -144,29 +144,46 @@ class AuthService
     ]);
   }
 
+
   public function createGovernmentByAdmin(array $data, User $creator): User
   {
-    return DB::transaction(function () use ($data, $creator) {
+    $aspect = new TransactionAspect();
+
+    $aspect->register(function () use (&$user, $data) {
       $data['password'] = Hash::make($data['password'] ?? bcrypt('defaultPassword'));
       $data['role_id'] = 2;
       $data['is_verified'] = 1;
-      $user = $this->users->create($data);
 
-      $governmentData = [
+      $user = $this->users->create($data);
+    });
+
+    $aspect->register(function () use (&$government, $data) {
+      $government = Government::create([
         'name'        => $data['name'],
         'location'    => $data['location'] ?? null,
         'description' => $data['description'] ?? null,
-      ];
-      $government = Government::create($governmentData);
+      ]);
+    });
+
+    $aspect->register(function () use (&$user, &$government) {
+      if (!$user || !$government) {
+        throw new \RuntimeException("User or Government creation failed");
+      }
 
       $this->users->attachToGovernment($user, $government->id);
-
-      $this->log($creator->id, 'create_government', [
-        'government_user_id' => $user->id,
-        'government_id'      => $government->id
-      ]);
-
-      return $user;
     });
+
+    $aspect->registerAfterCommit(function () use ($creator, &$user, &$government) {
+      $this->log($creator->id, 'create_government', [
+        'government_user_id' => $user?->id,
+        'government_id'      => $government?->id
+      ]);
+    });
+
+    $aspect->commit();
+    if (!$user) {
+      throw new \RuntimeException("User creation failed");
+    }
+    return $user;
   }
 }

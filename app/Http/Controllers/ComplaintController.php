@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ComplaintRequest;
+use App\Models\Complaint;
 
 class ComplaintController extends Controller
 {
@@ -15,11 +16,7 @@ class ComplaintController extends Controller
   public function addComplaint(ComplaintRequest $request)
   {
     $user = $request->user();
-    if (!$user) {
-      return response()->json(['message' => 'Unauthorized'], 401);
-    }
     $data = $request->only('title', 'description', 'location', 'status', 'type_id', 'government_id');
-
     $attachments = $request->file(('attachments'), []);
 
     $this->complaintSerive->addComplaint($user, $data, $attachments);
@@ -38,14 +35,13 @@ class ComplaintController extends Controller
 
   public function editComplaint($id, ComplaintRequest $request)
   {
+    $this->authorize('update', Complaint::findOrFail($id));
     $user = $request->user();
-    if (!$user) {
-      return response()->json(['message' => 'Unauthorized'], 401);
-    }
     $data = $request->only('status', 'note');
     return $this->complaintSerive->editComplaint($id, $user, $data);
   }
-  public function getComplaintLog($id) {
+  public function getComplaintLog($id)
+  {
     return response()->json($this->complaintSerive->getComplaintLog($id));
   }
 }

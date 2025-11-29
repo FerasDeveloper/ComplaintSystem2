@@ -9,6 +9,7 @@ use App\Http\Requests\RegisterCitizenRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AuthController extends Controller
 {
@@ -81,10 +82,9 @@ class AuthController extends Controller
 
   public function createEmployee(CreateEmployeeRequest $req)
   {
+    Gate::authorize('create-employee');
     $creator = $req->user();
     $governmentId = $creator->governments()->first()?->id;
-    if (!$governmentId) return response()->json(['message' => 'Creator not associated to a government'], 403);
-
     $data = $req->only(['name', 'email', 'phone', 'password']);
     $employee = $this->authService->createEmployeeByGovernment($data, $governmentId, $creator);
     return response()->json(['message' => 'Employee created', 'employee_id' => $employee->id], 201);

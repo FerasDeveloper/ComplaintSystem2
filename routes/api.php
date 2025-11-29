@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\PublicController;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -12,7 +13,7 @@ Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::get('governments', [PublicController::class, 'getGovernments']);
 Route::get('complaintTypes', [PublicController::class, 'getComplaintTypes']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::post('/government/employee', [AuthController::class, 'createEmployee']);
   Route::post('/addgovernment', [AuthController::class, 'createGovernment']);
@@ -22,7 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::patch('complaints/{id}', [ComplaintController::class, 'editComplaint']);
   Route::get('showComplaint/{id}', [ComplaintController::class, 'showComplaint']);
   Route::get('getComplaints', [ComplaintController::class, 'getComplaints']);
-
+  
   // Logs:
   Route::get('getComplaintLog/{complaintId}' , [ComplaintController::class, 'getComplaintLog']);
 });
