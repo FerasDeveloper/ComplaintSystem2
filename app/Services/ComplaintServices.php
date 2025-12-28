@@ -97,8 +97,14 @@ class ComplaintServices
       ], 423);
     }
   }
+
   public function getComplaintLog(int $id)
   {
     return $this->complaints->getComplaintLog($id);
+  }
+
+  public function getReports($data)
+  {
+    return $this->complaints->getReports($data);
   }
 }

@@ -39,6 +39,10 @@ class ComplaintRequest extends FormRequest
       return [
         'status' => 'required|string|in:pending,addNote,resolved,rejected',
       ];
+    } else if ($action === 'getReports') {
+      return [
+        'time' => 'sometimes|string|in:daily,weekly,monthly,yearly',
+      ];
     } else {
       return [];
     }

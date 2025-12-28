@@ -44,4 +44,10 @@ class ComplaintController extends Controller
   {
     return response()->json($this->complaintSerive->getComplaintLog($id));
   }
+
+  public function getReports(ComplaintRequest $request)
+  {
+    $data = $request->only('time');
+    return response()->json($this->complaintSerive->getReports($data));
+  }
 }

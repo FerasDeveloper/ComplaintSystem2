@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Complaint;
+use App\Models\ComplaintLog;
 use App\Models\ComplaintType;
 use App\Models\Government;
 use App\Models\Notification;
@@ -42,15 +43,15 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
   {
     $user = Auth::user();
     return Cache::remember("complaint_{$id}", \Carbon\Carbon::now()->addMinutes(10), function () use ($id, $user) {
-    $complaint = Complaint::with('attachments')->findOrFail($id);
-    if ($user->role_id !== 4) {
-      $complaint->load('logs');
-      $complaint->logs->each(function ($log) {
-        $log->user_name = User::find($log->user_id)->name;
-      });
-    }
-    $complaint->attachments->makeHidden(['file_type', 'complaint_id', 'created_at', 'updated_at']);
-    return $complaint;
+      $complaint = Complaint::with('attachments')->findOrFail($id);
+      if ($user->role_id !== 4) {
+        $complaint->load('logs');
+        $complaint->logs->each(function ($log) {
+          $log->user_name = User::find($log->user_id)->name;
+        });
+      }
+      $complaint->attachments->makeHidden(['file_type', 'complaint_id', 'created_at', 'updated_at']);
+      return $complaint;
     });
   }
 
@@ -108,5 +109,30 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
       $complaint['government_name'] = Government::find($complaint->government_id)->name;
       return $complaint;
     }
+  }
+
+  public function getReports($data)
+  {
+    $user = Auth::user();
+    $governmentId = $user->governments()->first()->id;
+    $complaintsQueryIds = Complaint::query();
+
+    if ($user->role_id === 3 || $user->role_id === 2) {
+      $complaintsQueryIds->where('government_id', $governmentId);
+    }
+
+    $complaintsQuery = ComplaintLog::query()->whereIn('complaint_id', $complaintsQueryIds->pluck('id'));
+
+    $time = $data['time'] ?? null;
+    if ($time === 'daily' || $time === null) {
+      $complaintsQuery->whereDate('created_at', Carbon::today());
+    } elseif ($time === 'weekly') {
+      $complaintsQuery->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+    } elseif ($time === 'monthly') {
+      $complaintsQuery->whereMonth('created_at', Carbon::now()->month);
+    } elseif ($time === 'yearly') {
+      $complaintsQuery->whereYear('created_at', Carbon::now()->year);
+    }
+    return $complaintsQuery->latest()->get();
   }
 }

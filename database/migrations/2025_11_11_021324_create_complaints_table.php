@@ -22,6 +22,7 @@ return new class extends Migration
       $table->integer('attachments_count')->default(0);
       $table->integer('processed_attachments')->default(0);
       $table->string('editing_by')->nullable();
+      $table->unique(['id', 'editing_by']);
       $table->foreignId('type_id')->constrained('complaint_types')->cascadeOnDelete()->cascadeOnUpdate();
       $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
       $table->foreignIdFor(Government::class)->constrained()->onDelete('cascade');
