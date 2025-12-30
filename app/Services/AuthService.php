@@ -78,7 +78,7 @@ class AuthService
       'is_verified' => false,
     ]);
 
-    SendOtpMailJob::dispatch($user, $otp);
+    SendOtpMailJob::dispatch($user, "Your verification code is: {$otp}", 'Email Verification Code');
 
     // مثال لتأخير التنفيذ 5 ثواني:
     // SendOtpMailJob::dispatch($user, $otp)->delay(now()->addSeconds(5));

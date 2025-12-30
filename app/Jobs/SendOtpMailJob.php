@@ -12,25 +12,27 @@ use Illuminate\Support\Facades\Mail;
 
 class SendOtpMailJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+  use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 3;      
-    public $timeout = 30;
+  public $tries = 3;
+  public $timeout = 30;
 
-    protected User $user;
-    protected string $otp;
+  protected User $user;
+  protected string $text;
+  protected string $type;
 
-    public function __construct(User $user, string $otp)
-    {
-        $this->user = $user;
-        $this->otp = $otp;
-    }
+  public function __construct(User $user, string $text, string $type)
+  {
+    $this->user = $user;
+    $this->text = $text;
+    $this->type = $type;
+  }
 
-    public function handle(): void
-    {
-        Mail::raw("Your verification code is: {$this->otp}", function ($message) {
-            $message->to($this->user->email)
-                    ->subject('Email Verification Code');
-        });
-    }
+  public function handle(): void
+  {
+    Mail::raw("{$this->text}", function ($message) {
+      $message->to($this->user->email)
+        ->subject("{$this->type} Notification");
+    });
+  }
 }

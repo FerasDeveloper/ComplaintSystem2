@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Jobs\SendOtpMailJob;
 use App\Models\Complaint;
 use App\Models\ComplaintLog;
 use App\Models\ComplaintType;
@@ -62,6 +63,7 @@ class EloquentComplaintRepository implements ComplaintRepositoryInterface
       'user_id' => $complaint->user_id,
       'content' => "Your complaint #{$complaint->id} status has been updated to {$data['status']}",
     ]);
+    SendOtpMailJob::dispatch(User::find($complaint->user_id), "Your complaint #{$complaint->id} status has been updated to {$data['status']}", 'Complaint Status Update');
     Cache::put("complaint_{$complaint->id}", $complaint, \Carbon\Carbon::now()->addMinutes(10));
   }
 

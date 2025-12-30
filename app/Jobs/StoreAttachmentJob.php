@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Complaint;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -57,6 +58,7 @@ class StoreAttachmentJob implements ShouldQueue
         'user_id' => $complaint->user_id,
         'content' => 'Failed to add your complaint because attachments upload failed. please try again',
       ]);
+      SendOtpMailJob::dispatch(User::find($complaint->user_id), 'Failed to add your complaint because attachments upload failed. please try again', 'Complaint Attachment Failure');
       $complaint->delete();
     }
     Log::critical("فشل نهائي بعد 3 محاولات لتخزين المرفق للشكوى {$this->complaint_id}: " . $exception->getMessage());
