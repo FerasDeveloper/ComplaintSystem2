@@ -36,7 +36,7 @@ class ComplaintServices
       $complaint->update(['status' => 'new']);
     }
     MethodAspect::after(__METHOD__, [
-      "${user['name']} added a complaint with id: ${complaint['id']}"
+      "{$user['name']} added a complaint with id: {$complaint['id']}"
     ]);
   }
 

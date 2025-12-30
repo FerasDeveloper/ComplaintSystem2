@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,12 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions): void {
-    //  رفض الصلاحيات
     $exceptions->render(function (AccessDeniedHttpException $e, $request) {
       return response()->json([
         'success' => false,
         'message' => 'You can not do this action',
       ], 403);
     });
+  })
+  ->withSchedule(function (Schedule $schedule) {
+    $schedule->command('backup:run')->dailyAt('02:00');
   })
   ->create();
