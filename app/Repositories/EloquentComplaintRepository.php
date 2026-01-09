@@ -13,8 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
-use function Symfony\Component\Clock\now;
-
 class EloquentComplaintRepository implements ComplaintRepositoryInterface
 {
   public function create(array $data): Complaint

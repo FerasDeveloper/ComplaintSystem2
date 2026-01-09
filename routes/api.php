@@ -12,7 +12,7 @@ Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::get('governments', [PublicController::class, 'getGovernments']);
 Route::get('complaintTypes', [PublicController::class, 'getComplaintTypes']);
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', 'log.requests'])->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::post('/government/employee', [AuthController::class, 'createEmployee']);
   Route::post('/addgovernment', [AuthController::class, 'createGovernment']);
@@ -22,8 +22,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
   Route::patch('complaints/{id}', [ComplaintController::class, 'editComplaint']);
   Route::get('showComplaint/{id}', [ComplaintController::class, 'showComplaint']);
   Route::get('getComplaints', [ComplaintController::class, 'getComplaints']);
-  
+
   // Logs:
-  Route::get('getComplaintLog/{complaintId}' , [ComplaintController::class, 'getComplaintLog']);
-  Route::post('getReports' , [ComplaintController::class, 'getReports']);
+  Route::get('getComplaintLog/{complaintId}', [ComplaintController::class, 'getComplaintLog']);
+  Route::post('getReports', [ComplaintController::class, 'getReports']);
 });

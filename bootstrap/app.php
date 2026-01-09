@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
   ->withMiddleware(function (Middleware $middleware): void {
     $middleware->alias([
       'verified' => \App\Http\Middleware\EnsureUserIsVerified::class,
+      'log.requests' => \App\Http\Middleware\LogRequestMiddleware::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions): void {

@@ -18,5 +18,8 @@ class AuthServiceProvider extends ServiceProvider
     Gate::define('create-employee', function ($user) {
       return $user->role_id == 2;
     });
+    Gate::define('create-government', function ($user) {
+      return $user->role_id == 1;
+    });
   }
 }

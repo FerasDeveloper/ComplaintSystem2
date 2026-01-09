@@ -111,6 +111,7 @@ class AuthController extends Controller
 
   public function createGovernment(CreateGovernmentRequest $req)
   {
+    Gate::authorize('create-government');
     $data = $req->only(['name', 'email', 'phone', 'password', 'location', 'description']);
 
     $governmentUser = $this->authService->createGovernmentByAdmin($data, $req->user());
